@@ -13,8 +13,15 @@ CREATE TABLE categories (
 );
 
 CREATE TABLE transactions(
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    category_id INTEGER REFERENCES cateories(id) ON DELETE SET NULL,
-    type VARCHAR(7) NOT NULL CHECK(type in( 'income', 'expense'))
-)
+    id               SERIAL PRIMARY KEY,
+    user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category_id      INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+    type             VARCHAR(7) NOT NULL CHECK(type IN( 'income', 'expense')),
+    amount           NUMERIC(12,2) NOT NULL CHECK (amount > 0),
+    description      VARCHAR(255),
+    transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_transactions_user_date
+    ON transactions (user_id, transaction_date)
