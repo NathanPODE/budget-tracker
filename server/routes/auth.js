@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const pool = require('../db/pool');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -41,6 +42,48 @@ router.post('/register', async (req, res) => {
         }
         console.error(err);
         res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body || { }
+
+        if(typeof email !== 'string' || typeof password !== 'string'){
+            return res.status(400).json({ error: 'Email and password are required'});
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const result = await pool.query(
+            `SELECT id, email, password_hash FROM users WHERE email = $1`,
+            [normalizedEmail]
+        );
+
+        const user = result.rows[0];
+        if(!user){
+            return res.status(401).json({ error: 'Invalid email or password'});
+        }
+
+        const passwordMatches = await bcrypt.compare(password, user.password_hash);
+
+        if(!passwordMatches){
+            return res.status(401).json({ error: 'Invalid email or password'});
+        }
+
+        const token = jwt.sign(
+            { userId: user.id },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d'}
+        );
+
+        res.json({
+            token,
+            user: { id: user.id, email: user.email},
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Something went wrong'});
     }
 });
 
