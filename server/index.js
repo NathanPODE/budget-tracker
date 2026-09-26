@@ -13,10 +13,6 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
-app.get('/api/whoami', requireAuth, (req, res) => {
-    res.json({ userId: req.userId });
-});
-
 app.get('/api/health', async (req, res) => {
     try {
         const result = await pool.query('SELECT NOW()');
