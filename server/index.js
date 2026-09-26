@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db/pool');
+
 const authRoutes = require('./routes/auth');
+const requireAuth = require('./middleware/auth');
 
 const app = express();
 
@@ -10,6 +12,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+
+app.get('/api/whoami', requireAuth, (req, res) => {
+    res.json({ userId: req.userId });
+});
 
 app.get('/api/health', async (req, res) => {
     try {
