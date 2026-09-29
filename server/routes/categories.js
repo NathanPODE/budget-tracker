@@ -107,4 +107,5 @@ router.patch('/:id', async (req, res) => {
         console.error(err);
         return res.status(500).json({ error: 'Something went wrong' });
     }
-})
+});
+
