@@ -109,3 +109,11 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+router.delete(':id', async (req, res) => {
+    id = Number(req.params.id);
+    if(!Number.isInteger(id)){
+        return res.status(400).json({ error: 'Invalid category id'});
+    }
+
+    
+})
