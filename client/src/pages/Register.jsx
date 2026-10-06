@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 
-function Login () {
+function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const location = useLocation();
-    const justRegistered = location.state?.registered;
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -17,7 +15,7 @@ function Login () {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:4000/api/auth/login', {
+            const response = await fetch('http://localhost:4000/api/auth/register' , {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -25,16 +23,15 @@ function Login () {
 
             const data = await response.json();
 
-            if(!response.ok) {
-                setError(data.error || 'Login failed');
+            if(!response.ok){
+                setError(data.error || 'Register failed');
                 return;
-            };
+            }
 
-            localStorage.setItem('token', data.token);
-            navigate('/transactions');
+            navigate('/login', { state: {registered: true } });
         } catch (err) {
             console.error(err);
-            setError('Could not reach the server');
+            setError('Could not reach server');
         } finally {
             setLoading(false);
         }
@@ -42,7 +39,7 @@ function Login () {
 
     return (
         <div className="max-w-sm mx-auto mt-16">
-            <h1 className="text-2xl font-bold mb-6">Log in</h1>
+            <h1 className="text-2xl font-bold mb-6">Register</h1>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -74,21 +71,16 @@ function Login () {
                   disabled={loading}
                   className="w-full bg-blue-600 text-white rounded px-3 py-2 disabled:opacity-50"
                   >
-                    {loading ? 'Logging in...' : 'Log in'}
+                    {loading ? 'Registering...' : 'Register'}
                 </button>
             </form>
 
-            {justRegistered ? (
-                <p className="mt-4 text-sm text-green-600">
-                    Account Created. Please log in.
-                </p>
-            ) : (
-                <p className="mt-4 text-sm">
-                    Don't have an account? <Link to="/register" className="text-blue-600 underline">Register</Link>
-                </p>
-            )}
+            <p className="mt-4 text-sm">
+                Already have an account? <Link to="/login" className="text-blue-600 underline">Login</Link>
+            </p>
         </div>
     )
+
 }
 
-export default Login
+export default Register;
