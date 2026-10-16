@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nathano
+      POSTGRES_DB: budget_tracker
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+
+  server:
+    build: ./server
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://nathano@db:5432/budget_tracker
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 4000
+    depends_on:
+      - db
+  
+  client:
+    build: ./client
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
